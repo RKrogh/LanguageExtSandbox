@@ -71,6 +71,90 @@ var result = Some(expenses)
     .Map(total => total * 0.1m);
 ```
 
+## Domain Entities
+
+The sandbox uses a simple but realistic domain model for expense tracking. Understanding these entities will help you follow the code examples:
+
+### **Expense** (`Entities/Expense.cs`)
+The core domain object representing a single expense transaction:
+
+```csharp
+public record Expense(
+    Guid Id,           // Unique identifier
+    decimal Amount,    // Transaction amount in SEK
+    string Description, // Human-readable description
+    DateTime Date,     // When the expense occurred
+    Category Category  // Categorization
+);
+```
+
+**Key characteristics:**
+- **Immutable**: Once created, an expense cannot be modified
+- **Value-based equality**: Two expenses with same values are considered equal
+- **Rich domain**: Contains business logic and validation rules
+
+### **Category** (`Entities/Category.cs`)
+Represents expense categories for organization and analysis:
+
+```csharp
+public record Category(string Name, string Color);
+```
+
+**Usage examples:**
+- `new Category("Food", "#FF6B6B")` - Red color for food expenses
+- `new Category("Transport", "#4ECDC4")` - Teal for transport
+- Categories enable grouping, filtering, and pattern matching
+
+### **ValidationError** (`Entities/ValidationError.cs`)
+Represents domain validation failures in a functional way:
+
+```csharp
+public record ValidationError(string Message);
+```
+
+**Why this matters:**
+- **No exceptions**: Errors are values, not thrown exceptions
+- **Composable**: Can be chained with `Either<ValidationError, T>`
+- **Descriptive**: Clear error messages for user feedback
+
+### **ExpenseSummary** (`Entities/ExpenseSummary.cs`)
+Aggregated view of expense data for reporting:
+
+```csharp
+public record ExpenseSummary(
+    decimal Total,           // Sum of all expenses
+    int Count,              // Number of expenses
+    Lst<Category> Categories // Unique categories used
+);
+```
+
+**Functional benefits:**
+- **Immutable aggregation**: Safe to share and cache
+- **Rich data**: Contains both calculated and raw data
+- **Composable**: Can be further transformed or combined
+
+### **Why These Entities Work Well for FP**
+
+1. **Immutability**: Records are immutable by default, preventing side effects
+2. **Value semantics**: Natural equality and comparison behavior
+3. **Composability**: Easy to combine and transform using functional operations
+4. **Type safety**: Strong typing prevents invalid states
+5. **Domain clarity**: Clear business concepts that map to real-world usage
+
+### **Entity Relationships**
+
+```
+Expense ──────┐
+  │           │
+  ├─ Category │
+  │           │
+  └─ ValidationError (when validation fails)
+     │
+     └─ ExpenseSummary (aggregated view)
+```
+
+This domain model provides a realistic foundation for exploring functional programming patterns while remaining simple enough to understand quickly.
+
 ## Key Language Ext Features Used
 
 - **`Option<T>`**: Safe optional values
